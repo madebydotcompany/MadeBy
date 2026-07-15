@@ -1,0 +1,3 @@
+import { Navigation } from "@/components/layout/navigation";
+import { Footer } from "@/components/layout/footer";
+export default function PrivacyPage() { return <><Navigation /><main className="mx-auto max-w-3xl px-5 py-20 lg:px-8"><p className="text-xs font-semibold uppercase tracking-[.18em] text-accent">Privacy</p><h1 className="mt-4 font-display text-5xl">Privacy, with care.</h1><p className="mt-8 text-lg leading-8 text-muted">StudioVerse is a prototype and does not currently collect, process, or retain personal customer data. A full privacy policy must be published before any public launch or live account collection.</p></main><Footer /></>; }
