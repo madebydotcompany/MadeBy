@@ -1,0 +1,3 @@
+import { Button } from "@/components/ui/button";
+
+export function EmptyState({ title = "Nothing here yet", description = "There is space for something meaningful to begin.", action = "Start creating" }: { title?: string; description?: string; action?: string }) { return <section className="grid min-h-80 place-items-center rounded-4xl border border-dashed border-line bg-ink/[.025] p-8 text-center"><div><div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-accent/15 text-xl">✦</div><h2 className="font-display text-2xl">{title}</h2><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">{description}</p><Button className="mt-6" size="sm">{action}</Button></div></section>; }

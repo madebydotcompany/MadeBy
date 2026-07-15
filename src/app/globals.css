@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --canvas: 42 33% 97%; --ink: 150 15% 13%; --muted: 151 8% 40%; --line: 40 17% 84%; --accent: 19 70% 49%; }
+.dark { --canvas: 150 14% 9%; --ink: 42 33% 94%; --muted: 42 12% 68%; --line: 150 9% 23%; --accent: 23 77% 61%; }
+* { border-color: hsl(var(--line)); }
+html { scroll-behavior: smooth; }
+body { background: hsl(var(--canvas)); color: hsl(var(--ink)); font-family: var(--font-sans), sans-serif; }
+::selection { background: hsl(var(--accent) / .28); }
+button, a { -webkit-tap-highlight-color: transparent; }
