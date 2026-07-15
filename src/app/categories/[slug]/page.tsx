@@ -1,0 +1,7 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Navigation } from "@/components/layout/navigation";
+import { Footer } from "@/components/layout/footer";
+import { StudioCard } from "@/components/discovery/studio-card";
+import { categories, studios } from "@/features/discovery/data";
+export default function CategoryPage({ params }: { params: { slug: string } }) { const category = categories.find(item => item.name.toLowerCase().replaceAll(" ", "-") === params.slug); if (!category) notFound(); const related = studios.filter((_, index) => index % 2 === category.name.length % 2); return <><Navigation /><main className="mx-auto max-w-7xl px-5 py-14 lg:px-8"><nav aria-label="Breadcrumb" className="text-sm text-muted"><Link href="/categories" className="hover:text-ink">Categories</Link> <span className="px-2">/</span> {category.name}</nav><div className="mt-10 max-w-3xl"><p className="text-xs font-semibold uppercase tracking-[.18em] text-accent">Creative category</p><h1 className="mt-3 font-display text-6xl">{category.name}</h1><p className="mt-5 text-lg leading-8 text-muted">A curated field of independent Studios, works, and stories connected by material, practice, and point of view.</p></div><div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">{related.map((studio, index) => <StudioCard key={studio.name} studio={studio} index={index} />)}</div></main><Footer /></>; }

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { Studio } from "@/features/studios/types";
 
 function Arrow() { return <span aria-hidden="true">↗</span>; }
-function SectionTitle({ eyebrow, title, action }: { eyebrow: string; title: string; action?: string }) { return <div className="flex items-end justify-between gap-5"><div><p className="text-xs font-semibold uppercase tracking-[.18em] text-[var(--studio-accent)]">{eyebrow}</p><h2 className="mt-3 font-display text-4xl leading-none sm:text-5xl">{title}</h2></div>{action && <Link href="#" className="shrink-0 text-sm underline decoration-1 underline-offset-4 hover:text-[var(--studio-accent)]">{action} <Arrow /></Link>}</div>; }
+function SectionTitle({ eyebrow, title, action }: { eyebrow: string; title: string; action?: string }) { return <div className="flex items-end justify-between gap-5"><div><p className="text-xs font-semibold uppercase tracking-[.18em] text-[var(--studio-accent)]">{eyebrow}</p><h2 className="mt-3 font-display text-4xl leading-none sm:text-5xl">{title}</h2></div>{action && <Link href="/explore" className="shrink-0 text-sm underline decoration-1 underline-offset-4 hover:text-[var(--studio-accent)]">{action} <Arrow /></Link>}</div>; }
 
 export function StudioPage({ studio }: { studio: Studio }) {
   return <main style={{ "--studio-accent": studio.theme.accent, "--studio-wash": studio.theme.wash, "--studio-ink": studio.theme.ink } as React.CSSProperties} className="overflow-hidden bg-canvas [--studio-accent:#bd5335]">

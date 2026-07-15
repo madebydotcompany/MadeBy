@@ -1,9 +1,4 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-
-export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-  return <button aria-label="Toggle color theme" onClick={() => setTheme(isDark ? "light" : "dark")} className="grid h-10 w-10 place-items-center rounded-full border border-line transition hover:bg-ink/5"><span aria-hidden>{isDark ? "☀" : "◐"}</span></button>;
-}
+export function ThemeToggle() { const { resolvedTheme, setTheme } = useTheme(); const [mounted, setMounted] = useState(false); useEffect(() => setMounted(true), []); const isDark = resolvedTheme === "dark"; return <button aria-label={mounted ? `Switch to ${isDark ? "light" : "dark"} theme` : "Toggle color theme"} onClick={() => mounted && setTheme(isDark ? "light" : "dark")} className="grid h-10 w-10 place-items-center rounded-full border border-line transition hover:bg-ink/5">{mounted && <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">{isDark ? <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></> : <path d="M20.5 15.5A8.5 8.5 0 1 1 8.5 3.5 7 7 0 0 0 20.5 15.5Z" />}</svg>}</button>; }
