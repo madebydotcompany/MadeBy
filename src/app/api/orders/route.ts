@@ -1,0 +1,3 @@
+import { fail, ok, readJson } from "@/lib/api"; import { databaseBackend } from "@/services/database-backend";
+export async function GET() { try { return ok(await databaseBackend.orders()); } catch (error) { return fail(error instanceof Error ? error.message : "Unable to load orders", 500); } }
+export async function POST(request: Request) { const body = await readJson<{ shippingAddress?: Record<string, string> }>(request); try { return ok(await databaseBackend.createOrder(body?.shippingAddress), { status: 201 }); } catch (error) { return fail(error instanceof Error ? error.message : "Unable to create order"); } }

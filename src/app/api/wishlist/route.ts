@@ -1,0 +1,3 @@
+import { fail, ok, readJson } from "@/lib/api"; import { databaseBackend } from "@/services/database-backend";
+export async function GET() { try { return ok(await databaseBackend.wishlist()); } catch (error) { return fail(error instanceof Error ? error.message : "Unable to load wishlist", 500); } }
+export async function POST(request: Request) { const body = await readJson<{ productSlug: string }>(request); if (!body?.productSlug) return fail("A valid productSlug is required"); try { return ok(await databaseBackend.wishlistToggle(body.productSlug)); } catch (error) { return fail(error instanceof Error ? error.message : "Unable to update wishlist"); } }

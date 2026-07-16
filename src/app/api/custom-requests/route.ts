@@ -1,0 +1,4 @@
+import { fail, ok, readJson } from "@/lib/api"; import { databaseBackend } from "@/services/database-backend";
+type Input = { studioSlug: string; description: string; budget?: string; deadline?: string; notes?: string };
+export async function GET(request: Request) { try { return ok(await databaseBackend.customRequests(new URL(request.url).searchParams.get("studio") ?? undefined)); } catch (error) { return fail(error instanceof Error ? error.message : "Unable to load requests", 500); } }
+export async function POST(request: Request) { const body = await readJson<Input>(request); if (!body?.studioSlug || !body.description?.trim()) return fail("studioSlug and description are required"); try { return ok(await databaseBackend.createCustomRequest({ ...body, description: body.description.trim() }), { status: 201 }); } catch (error) { return fail(error instanceof Error ? error.message : "Unable to create request"); } }

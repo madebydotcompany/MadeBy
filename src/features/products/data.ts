@@ -1,4 +1,5 @@
 import type { Product } from "./types";
+import { studios } from "@/features/studios/data";
 
 export const products: Product[] = [{
   slug: "low-moon-bowl",
@@ -24,3 +25,6 @@ export const products: Product[] = [{
 
 export function getProduct(slug: string) { return products.find((product) => product.slug === slug); }
 export const formatPrice = (amount: number, currency = "USD") => new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+
+const knownSlugs = new Set(products.map(product => product.slug));
+studios.flatMap(studio => studio.products.map(product => ({ studio, product }))).filter(({ product }) => product.slug && !knownSlugs.has(product.slug)).forEach(({ studio, product }) => { const price = Number(product.price.replace(/[^0-9]/g, "")); products.push({ slug: product.slug!, name: product.name, type: "ready-made", price, currency: "USD", studio: { name: studio.name, slug: studio.slug, location: studio.location, avatar: studio.avatar }, gallery: [product.image, studio.hero], story: `${product.name} is a considered work from ${studio.name}, made in ${studio.location}.`, inspiration: studio.bio, process: ["Developed in the studio", "Made in a small, considered batch", "Finished and checked by the artist"], materials: ["Artist-selected materials", "Small-batch finish"], dimensions: "Dimensions vary slightly with the hand-made process.", care: "Care guidance is included with every work.", collection: { name: studio.collections[0].name, note: studio.collections[0].note, image: studio.collections[0].image }, related: [], reviews: [{ quote: studio.review.quote, author: studio.review.name, location: studio.review.role }], delivery: "Ready to ship from the artist's studio in 3–5 business days." }); });

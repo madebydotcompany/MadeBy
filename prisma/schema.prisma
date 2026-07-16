@@ -1,169 +1,252 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
 
-enum UserRole { USER ARTIST ADMIN MODERATOR }
-enum StudioStatus { DRAFT PENDING APPROVAL REJECTED ACTIVE SUSPENDED }
-enum ProductType { READY_MADE MADE_ON_DEMAND DIGITAL }
-enum ProductStatus { DRAFT PENDING_REVIEW PUBLISHED ARCHIVED REJECTED }
-enum OrderStatus { PENDING PAID IN_PROGRESS FULFILLED SHIPPED DELIVERED CANCELLED REFUNDED }
-enum NotificationType { FOLLOW LIKE COMMENT REPLY ORDER MESSAGE REVIEW SYSTEM }
-enum RequestStatus { NEW ACCEPTED DECLINED IN_PROGRESS COMPLETE }
-enum ModerationStatus { PENDING APPROVED REJECTED ESCALATED }
-enum ReportStatus { OPEN INVESTIGATING RESOLVED DISMISSED }
-enum CollaborationStatus { PROPOSED ACTIVE COMPLETE DECLINED }
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
 
 model User {
-  id String @id @default(cuid())
-  clerkId String? @unique
-  email String @unique
-  name String?
-  imageUrl String?
-  role UserRole @default(USER)
-  bio String?
-  studio Studio?
-  orders Order[]
-  reviews Review[]
-  comments Comment[]
-  likes Like[]
-  productSaves ProductSave[]
-  collectionSaves CollectionSave[]
-  studioFollows Follow[] @relation("FollowingUser")
-  notifications Notification[]
-  sentMessages Message[] @relation("SentMessages")
-  messageMemberships MessageMember[]
-  customizationRequests CustomizationRequest[]
-  openCreativeRequests OpenCreativeRequest[]
-  designs PodDesign[]
-  verificationRequests ArtistVerification[]
-  copyrightReports CopyrightReport[]
-  mobileDevices MobileDevice[]
-  aiJobs AiJob[]
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String?  @unique
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  role      String   @default("USER")
+  bio       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@index([role])
 }
 
 model Studio {
-  id String @id @default(cuid())
-  ownerId String @unique
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  slug String @unique
-  name String
-  bio String?
-  location String?
-  theme Json?
-  status StudioStatus @default(DRAFT)
-  isVerified Boolean @default(false)
-  isFeatured Boolean @default(false)
-  products Product[]
-  collections Collection[]
-  orders Order[]
-  blogs Blog[]
-  videos Video[]
-  reviews Review[]
-  followers Follow[]
-  messages MessageThread[]
-  customizationRequests CustomizationRequest[]
-  commissionSettings CommissionSettings?
-  designs PodDesign[]
-  licenses License[]
-  brandCollaborations BrandCollaboration[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId    String   @unique @db.ObjectId
+  slug       String   @unique
+  name       String
+  bio        String?
+  location   String?
+  theme      Json?
+  status     String   @default("DRAFT")
+  isVerified Boolean  @default(false)
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   @@index([status, isFeatured])
 }
 
 model Product {
-  id String @id @default(cuid())
-  studioId String
-  collectionId String?
-  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
-  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
-  slug String @unique
-  name String
-  description String?
-  type ProductType
-  status ProductStatus @default(DRAFT)
-  price Int
-  currency String @default("USD")
-  inventory Int?
-  media Json @default("[]")
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  studioId      String   @db.ObjectId
+  collectionId  String?  @db.ObjectId
+  slug          String   @unique
+  name          String
+  description   String?
+  type          String
+  status        String   @default("DRAFT")
+  price         Int
+  currency      String   @default("USD")
+  inventory     Int?
+  media         Json     @default("[]")
   configuration Json?
-  moderationCases ModerationCase[]
-  orderItems OrderItem[]
-  likes Like[]
-  comments Comment[]
-  saves ProductSave[]
-  reviews Review[]
-  customizationRequests CustomizationRequest[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   @@index([studioId, status])
   @@index([collectionId])
 }
 
 model Collection {
-  id String @id @default(cuid())
-  studioId String
-  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
-  slug String @unique
-  name String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  studioId    String   @db.ObjectId
+  slug        String   @unique
+  name        String
   description String?
-  coverImage String?
-  products Product[]
-  saves CollectionSave[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  coverImage  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   @@index([studioId])
 }
 
 model Order {
-  id String @id @default(cuid())
-  buyerId String
-  studioId String
-  buyer User @relation(fields: [buyerId], references: [id])
-  studio Studio @relation(fields: [studioId], references: [id])
-  status OrderStatus @default(PENDING)
-  subtotal Int
-  shippingAmount Int @default(0)
-  total Int
-  currency String @default("USD")
-  stripePaymentIntentId String? @unique
-  shippingAddress Json?
-  metadata Json?
-  items OrderItem[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  buyerId               String   @db.ObjectId
+  studioId              String   @db.ObjectId
+  status                String   @default("PENDING")
+  subtotal              Int
+  shippingAmount        Int      @default(0)
+  total                 Int
+  currency              String   @default("USD")
+  stripePaymentIntentId String?  @unique
+  shippingAddress       Json?
+  metadata              Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
   @@index([buyerId, createdAt])
   @@index([studioId, status])
 }
-model OrderItem { id String @id @default(cuid()) orderId String productId String? order Order @relation(fields: [orderId], references: [id], onDelete: Cascade) product Product? @relation(fields: [productId], references: [id], onDelete: SetNull) name String quantity Int @default(1) unitPrice Int configuration Json? }
 
-model Blog { id String @id @default(cuid()) studioId String studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade) slug String @unique title String body String status ProductStatus @default(DRAFT) publishedAt DateTime? comments Comment[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([studioId, status]) }
-model Video { id String @id @default(cuid()) studioId String studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade) title String url String thumbnailUrl String? duration Int? publishedAt DateTime? createdAt DateTime @default(now()) @@index([studioId, publishedAt]) }
-model Review { id String @id @default(cuid()) userId String studioId String productId String? user User @relation(fields: [userId], references: [id]) studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade) product Product? @relation(fields: [productId], references: [id], onDelete: SetNull) rating Int quote String? createdAt DateTime @default(now()) @@index([studioId, createdAt]) }
+model OrderItem {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId       String   @db.ObjectId
+  productId     String?  @db.ObjectId
+  name          String
+  quantity      Int      @default(1)
+  unitPrice     Int
+  configuration Json?
+  createdAt     DateTime @default(now())
+  @@index([orderId])
+}
 
-model Follow { id String @id @default(cuid()) followerId String studioId String follower User @relation("FollowingUser", fields: [followerId], references: [id], onDelete: Cascade) studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade) createdAt DateTime @default(now()) @@unique([followerId, studioId]) @@index([studioId, createdAt]) }
-model Like { id String @id @default(cuid()) userId String productId String user User @relation(fields: [userId], references: [id], onDelete: Cascade) product Product @relation(fields: [productId], references: [id], onDelete: Cascade) createdAt DateTime @default(now()) @@unique([userId, productId]) @@index([productId, createdAt]) }
-model ProductSave { id String @id @default(cuid()) userId String productId String user User @relation(fields: [userId], references: [id], onDelete: Cascade) product Product @relation(fields: [productId], references: [id], onDelete: Cascade) createdAt DateTime @default(now()) @@unique([userId, productId]) }
-model CollectionSave { id String @id @default(cuid()) userId String collectionId String user User @relation(fields: [userId], references: [id], onDelete: Cascade) collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade) createdAt DateTime @default(now()) @@unique([userId, collectionId]) }
-model Comment { id String @id @default(cuid()) userId String productId String? blogId String? parentId String? user User @relation(fields: [userId], references: [id], onDelete: Cascade) product Product? @relation(fields: [productId], references: [id], onDelete: Cascade) blog Blog? @relation(fields: [blogId], references: [id], onDelete: Cascade) parent Comment? @relation("CommentReplies", fields: [parentId], references: [id]) replies Comment[] @relation("CommentReplies") body String createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([productId, createdAt]) @@index([blogId, createdAt]) }
-model Notification { id String @id @default(cuid()) userId String user User @relation(fields: [userId], references: [id], onDelete: Cascade) type NotificationType actorId String? entityType String? entityId String? readAt DateTime? createdAt DateTime @default(now()) @@index([userId, readAt, createdAt]) }
-model MessageThread { id String @id @default(cuid()) studioId String studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade) members MessageMember[] messages Message[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
-model MessageMember { id String @id @default(cuid()) threadId String userId String thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade) user User @relation(fields: [userId], references: [id], onDelete: Cascade) @@unique([threadId, userId]) }
-model Message { id String @id @default(cuid()) threadId String senderId String thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade) sender User @relation("SentMessages", fields: [senderId], references: [id]) body String attachments Json? readAt DateTime? createdAt DateTime @default(now()) @@index([threadId, createdAt]) }
+// A cart is intentionally separate from orders: it lets a visitor return to an
+// in-progress purchase and keeps checkout idempotent when a payment provider
+// is added later.
+model Cart {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String     @unique @db.ObjectId
+  currency  String     @default("USD")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  lines     CartLine[]
+  @@index([updatedAt])
+}
 
-model CustomizationRequest { id String @id @default(cuid()) productId String userId String studioId String product Product @relation(fields: [productId], references: [id]) user User @relation(fields: [userId], references: [id]) studio Studio @relation(fields: [studioId], references: [id]) status RequestStatus @default(NEW) selections Json notes String? estimatedDelivery DateTime? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([studioId, status]) }
-model BlankProduct { id String @id @default(cuid()) sku String @unique name String description String? category String basePrice Int currency String @default("USD") variants Json @default("[]") printAreas Json @default("[]") images Json @default("[]") active Boolean @default(true) designs PodDesign[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([category, active]) }
-model PodDesign { id String @id @default(cuid()) userId String studioId String blankProductId String user User @relation(fields: [userId], references: [id]) studio Studio @relation(fields: [studioId], references: [id]) blankProduct BlankProduct @relation(fields: [blankProductId], references: [id]) name String artwork Json status ProductStatus @default(DRAFT) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([studioId, status]) }
-model OpenCreativeRequest { id String @id @default(cuid()) userId String user User @relation(fields: [userId], references: [id]) title String brief String budgetMin Int? budgetMax Int? currency String @default("USD") tags String[] status RequestStatus @default(NEW) createdAt DateTime @default(now()) @@index([status, createdAt]) }
+model CartLine {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  cartId        String   @db.ObjectId
+  productId     String   @db.ObjectId
+  quantity      Int      @default(1)
+  configuration Json?
+  savedForLater Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  @@unique([cartId, productId])
+  @@index([cartId, savedForLater])
+}
 
-model ArtistVerification { id String @id @default(cuid()) userId String user User @relation(fields: [userId], references: [id]) status ModerationStatus @default(PENDING) evidence Json reviewerId String? reviewedAt DateTime? createdAt DateTime @default(now()) @@index([status, createdAt]) }
-model ModerationCase { id String @id @default(cuid()) productId String product Product @relation(fields: [productId], references: [id], onDelete: Cascade) status ModerationStatus @default(PENDING) reason String reviewerId String? notes String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([status, createdAt]) }
-model CopyrightReport { id String @id @default(cuid()) reporterId String reporter User @relation(fields: [reporterId], references: [id]) productId String? url String reason String evidence Json? status ReportStatus @default(OPEN) reviewerId String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([status, createdAt]) }
-model CommissionSettings { id String @id @default(cuid()) studioId String @unique studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade) accepting Boolean @default(false) minimumBudget Int? leadTimeDays Int? terms String? updatedAt DateTime @updatedAt }
+model Blog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  studioId    String   @db.ObjectId
+  slug        String   @unique
+  title       String
+  body        String
+  status      String   @default("DRAFT")
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([studioId, status])
+}
 
-model AiJob { id String @id @default(cuid()) userId String user User @relation(fields: [userId], references: [id]) kind String input Json output Json? status String @default("QUEUED") createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([userId, kind, createdAt]) }
-model License { id String @id @default(cuid()) studioId String studio Studio @relation(fields: [studioId], references: [id]) productId String? terms Json status String @default("DRAFT") createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([studioId, status]) }
-model Course { id String @id @default(cuid()) studioId String title String slug String @unique description String? content Json status ProductStatus @default(DRAFT) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([studioId, status]) }
-model BrandCollaboration { id String @id @default(cuid()) studioId String studio Studio @relation(fields: [studioId], references: [id]) brandName String brief String? status CollaborationStatus @default(PROPOSED) terms Json? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([studioId, status]) }
-model MobileDevice { id String @id @default(cuid()) userId String user User @relation(fields: [userId], references: [id], onDelete: Cascade) platform String pushToken String @unique createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Video {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  studioId     String   @db.ObjectId
+  title        String
+  url          String
+  thumbnailUrl String?
+  duration     Int?
+  publishedAt  DateTime?
+  createdAt    DateTime @default(now())
+  @@index([studioId, publishedAt])
+}
+
+model SocialAction {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  targetType String
+  targetId   String   @db.ObjectId
+  action     String
+  parentId   String?  @db.ObjectId
+  body       String?
+  createdAt  DateTime @default(now())
+  @@index([targetType, targetId, createdAt])
+  @@unique([userId, targetType, targetId, action])
+}
+
+model Notification {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  type       String
+  actorId    String?  @db.ObjectId
+  entityType String?
+  entityId   String?
+  readAt     DateTime?
+  createdAt  DateTime @default(now())
+  @@index([userId, readAt, createdAt])
+}
+
+model MessageThread {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  studioId  String   @db.ObjectId
+  memberIds String[] @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([studioId, updatedAt])
+}
+
+model Message {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  threadId    String   @db.ObjectId
+  senderId    String   @db.ObjectId
+  body        String
+  attachments Json?
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  @@index([threadId, createdAt])
+}
+
+model CustomizationRequest {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId         String   @db.ObjectId
+  userId            String   @db.ObjectId
+  studioId          String   @db.ObjectId
+  status            String   @default("NEW")
+  selections        Json
+  notes             String?
+  estimatedDelivery DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  @@index([studioId, status])
+}
+
+model BlankProduct {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  sku        String   @unique
+  name       String
+  description String?
+  category   String
+  basePrice  Int
+  currency   String   @default("USD")
+  variants   Json     @default("[]")
+  printAreas Json     @default("[]")
+  images     Json     @default("[]")
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@index([category, active])
+}
+
+model PodDesign {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String   @db.ObjectId
+  studioId       String   @db.ObjectId
+  blankProductId String   @db.ObjectId
+  name           String
+  artwork        Json
+  status         String   @default("DRAFT")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  @@index([studioId, status])
+}
+
+model PlatformRecord {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  kind       String
+  subjectId  String?  @db.ObjectId
+  ownerId    String?  @db.ObjectId
+  status     String   @default("OPEN")
+  payload    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@index([kind, status, createdAt])
+}
